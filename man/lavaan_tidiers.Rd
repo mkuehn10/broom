@@ -20,8 +20,38 @@ or \code{\link[lavaan:sem]{lavaan::sem()}}}
 \code{\link[lavaan:parameterEstimates]{lavaan::parameterEstimates()}}. Ignored for \code{glance}.`}
 }
 \value{
-\code{glance} returns statistics measuring model fit. TODO: Document.
+\code{tidy} returns a tibble with one row for each estimated parameter and columns:
+\item{term}{The result of paste(lhs, op, rhs)}
+\item{op}{The operator in the model syntax (e.g. ~~ for covariances, or ~ for regression parameters)}
+\item{group}{The group (if specified) in the lavaan model}
+\item{estimate}{The parameter estimate (may be standardized)}
+\item{std.error}{}
+\item{statistic}{The z value returned by \code{\link[lavaan:parameterEstimates]{lavaan::parameterEstimates()}}}
+\item{p.value}{}
+\item{conf.low}{}
+\item{conf.high}{}
+\item{std.lv}{Standardized estimates based on the variances of the (continuous) latent variables only}
+\item{std.all}{Standardized estimates based on both the variances of both (continuous) observed and latent variables.}
+\item{std.nox}{Standardized estimates based on both the variances of both (continuous) observed and latent variables, but not the variances of exogenous covariates.}
 }
 \description{
 These methods tidy the coefficients of lavaan CFA and SEM models.
+}
+\examples{
+
+if (require("lavaan", quietly = TRUE)) {
+ 
+ cfa.fit <- cfa('F =~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9', data = HolzingerSwineford1939, group = "school")
+ tidy.lavaan(cfa.fit) \%>\% filter(op=="~~" & toupper(term)==term)
+ 
+ }
+
+
+if (require("lavaan", quietly = TRUE)) {
+ 
+ cfa.fit <- cfa('F =~ x1 + x2 + x3 + x4 + x5' , data = HolzingerSwineford1939, group = "school")
+ glance.lavaan(cfa.fit) \%>\% gather()
+ 
+ }
+ 
 }

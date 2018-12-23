@@ -84,6 +84,7 @@ Suggests:
     knitr,
     ks,
     Lahman,
+    lavaan,
     lfe,
     lme4,
     lmodel2,
