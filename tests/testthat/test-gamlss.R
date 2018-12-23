@@ -1,28 +1,38 @@
-context("gamlss tidiers")
+context("gamlss")
 
-has_deps <- c("gamlss", "gamlss.data") %>% 
-  sapply(function(.x) requireNamespace(.x, quietly = TRUE)) %>%
-  all()
+skip_if_not_installed("modeltests")
+library(modeltests)
 
-if (has_deps) {
-  data(abdom, package = "gamlss.data")
-  mod <- gamlss::gamlss(
-    y ~ gamlss::pb(x),
-    sigma.fo = ~ gamlss::pb(x),
-    family = gamlss.dist::BCT,
-    data = abdom,
-    method = mixed(1, 20),
-    control = gamlss::gamlss.control(trace = FALSE)
-  )
+skip_if_not_installed("gamlss")
+skip_if_not_installed("gamlss.data")
+skip_if_not_installed("gamlss.dist")
+
+library(gamlss)
+library(gamlss.data)
+library(gamlss.dist)
+
+data(abdom, package = "gamlss.data")
+
+fit <- gamlss(
+  y ~ pb(x),
+  sigma.fo = ~ pb(x),
+  family = BCT,
+  data = abdom,
+  method = mixed(1, 20),
+  control = gamlss.control(trace = FALSE)
+)
+
+test_that("gamless tidier arguments", {
+  check_arguments(tidy.gamlss)
+})
+
+test_that("tidy.gamlss", {
+  td <- tidy(fit)
+  tdq <- tidy(fit, quick = TRUE)
   
-  test_that("tidy.gamlss work", {
-    td <- tidy(mod)
-    check_tidy(td, exp.row = 6, exp.col = 6)
-  })
+  check_tidy_output(td)
+  check_tidy_output(tdq)
   
-  test_that("quick tidy.gamlss works", {
-    td <- tidy(mod, quick = TRUE)
-    check_tidy(td, exp.row = 2, exp.col = 2)
-  })
-}
-
+  check_dims(td, 6, 6)
+  check_dims(tdq, 2, 2)
+})

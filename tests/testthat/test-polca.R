@@ -1,32 +1,43 @@
-context("polca tidiers")
+context("polca")
 
-if (require(poLCA)) {
-  data(values)
-  f <- cbind(A, B, C, D) ~ 1
-  M1 <- poLCA(f, values, nclass = 2, verbose = FALSE)
+skip_if_not_installed("modeltests")
+library(modeltests)
+
+skip_if_not_installed("poLCA")
+library(poLCA)
+
+data(values)
+fit <- poLCA(cbind(A, B, C, D) ~ 1, values, nclass = 2, verbose = FALSE)
+
+test_that("poLCA tidier arguments", {
+  check_arguments(tidy.poLCA)
+  check_arguments(glance.poLCA)
+  check_arguments(augment.poLCA)
+})
+
+test_that("tidy.poLCA", {
+  td <- tidy(fit)
+  check_tidy_output(td)
+  check_dims(td, 16, 5)
+})
+
+test_that("glance.poLCA", {
+  gl <- glance(fit)
+  check_glance_outputs(gl)
+  check_dims(gl, expected_cols = 7)
+})
+
+test_that("augment.poLCA", {
   
-  test_that("polca tidiers work", {
-    td <- tidy(M1)
-    check_tidy(td, exp.row = 16, exp.col = 5)
-    
-    au <- augment(M1)
-    check_tidy(au, exp.col = 7)
-    
-    gl <- glance(M1)
-    check_tidy(gl, exp.col = 7)
-  })
+  au <- augment(fit)
   
-  test_that("data argument can be added for augment", {
-    au <- augment(M1, values)
-    check_tidy(au, exp.col = 6)
-  })
-  
-  test_that("rows removed for NAs get new columns with NAs", {
-    values2 <- values
-    values2[1, 1] <- NA
-    M2 <- poLCA(f, values2, nclass = 2, verbose = FALSE)
-    
-    au <- augment(M2, values)
-    check_tidy(au, exp.col = 6)
-  })
-}
+  check_augment_function(
+    aug = augment.poLCA,
+    model = fit,
+    data = values,
+    newdata = values,
+    strict = FALSE
+  )
+})
+
+
